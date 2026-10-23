@@ -2,7 +2,10 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GeoPort" />
   <title>{{ app_name }} - iOS Location Simulation</title>
 
   <!-- Leaflet CSS -->
@@ -56,6 +59,10 @@
             🔄
           </button>
         </div>
+
+        <button id="wirelessModalBtn" class="icon-btn" title="Wireless iPhone Setup & QR Code">
+          📱
+        </button>
 
         <button id="themeToggleBtn" class="icon-btn" title="Toggle Light/Dark Theme">
           🌙
@@ -208,6 +215,44 @@
       </div>
     </aside>
 
+  </div>
+
+  <!-- Wireless Mobile Setup Modal -->
+  <div id="wirelessModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; max-width: 440px; width: 90%; box-shadow: var(--card-shadow); color: var(--text-primary);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <span>📱</span> Wireless iPhone Control
+        </h3>
+        <button id="closeWirelessModalBtn" class="icon-btn" style="width: 32px; height: 32px; border: none; font-size: 1.2rem;">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+        You can control your iPhone's GPS wirelessly directly from your phone screen:
+      </p>
+
+      <ol style="font-size: 0.82rem; color: var(--text-secondary); margin-left: 20px; margin-bottom: 16px; line-height: 1.6;">
+        <li>Connect your iPhone via USB <b>once</b> to pair.</li>
+        <li>Ensure your iPhone and PC are on the <b>same Wi-Fi</b>.</li>
+        <li>Open Safari on your iPhone and go to the link below:</li>
+      </ol>
+
+      <div style="background: rgba(37,99,235,0.08); border: 1px dashed var(--accent-blue); padding: 12px; border-radius: var(--radius-md); text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">iPhone Safari URL</div>
+        <div id="mobileUrlDisplay" style="font-size: 1.05rem; font-weight: 700; color: var(--accent-blue); font-family: monospace; word-break: break-all;">
+          Loading network IP...
+        </div>
+      </div>
+
+      <div id="qrCodeContainer" style="display: flex; justify-content: center; margin-bottom: 16px;">
+        <img id="qrCodeImg" src="" alt="QR Code" style="display: none; width: 140px; height: 140px; border-radius: 8px; border: 1px solid var(--border-color); padding: 4px; background: #fff;" />
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="copyMobileUrlBtn" class="btn btn-primary" style="flex: 1;">📋 Copy URL</button>
+        <button id="closeWirelessModalBtn2" class="btn btn-secondary" style="width: auto;">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification Container -->

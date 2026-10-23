@@ -1,8 +1,23 @@
 import logging
 import os
+import socket
 import sys
 from pathlib import Path
 from dataclasses import dataclass
+
+
+def get_local_ip() -> str:
+    """Detect machine's primary local LAN IP address."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
+
 
 APP_NAME = "GeoPort"
 APP_VERSION = "5.0.0"
@@ -23,6 +38,8 @@ PLATFORM_LABEL = {
     "darwin": "macOS",
     "linux": "Linux",
 }.get(PLATFORM_SYSTEM, "Unknown")
+
+LOCAL_LAN_IP = get_local_ip()
 
 # External endpoints
 FUEL_API_URL = "https://projectzerothree.info/api.php?format=json"
@@ -47,6 +64,7 @@ class AppConfig:
     host: str = "127.0.0.1"
     port: int = 54321
     open_browser: bool = True
+    wireless_mode: bool = False
     wifihost: str | None = None
     target_udid: str | None = None
     debug: bool = False
@@ -54,3 +72,4 @@ class AppConfig:
 
 # Global config instance (initialized at main startup)
 settings = AppConfig()
+

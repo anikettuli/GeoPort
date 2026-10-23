@@ -11,8 +11,61 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   initPanelCollapse();
   initWebSocket();
+  initWirelessModal();
   checkSystemInfo();
 });
+
+// Wireless iPhone Control Modal
+function initWirelessModal() {
+  const modal = document.getElementById("wirelessModal");
+  const openBtn = document.getElementById("wirelessModalBtn");
+  const closeBtn1 = document.getElementById("closeWirelessModalBtn");
+  const closeBtn2 = document.getElementById("closeWirelessModalBtn2");
+  const copyBtn = document.getElementById("copyMobileUrlBtn");
+  const urlDisplay = document.getElementById("mobileUrlDisplay");
+  const qrImg = document.getElementById("qrCodeImg");
+
+  if (!modal || !openBtn) return;
+
+  async function openModal() {
+    modal.style.display = "flex";
+    try {
+      const res = await fetch("/api/system/info");
+      const info = await res.json();
+      const mobileUrl = info.mobile_url || window.location.href;
+      if (urlDisplay) urlDisplay.textContent = mobileUrl;
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(mobileUrl)}`;
+        qrImg.style.display = "block";
+      }
+    } catch (e) {
+      if (urlDisplay) urlDisplay.textContent = window.location.href;
+    }
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  openBtn.addEventListener("click", openModal);
+  if (closeBtn1) closeBtn1.addEventListener("click", closeModal);
+  if (closeBtn2) closeBtn2.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const url = urlDisplay ? urlDisplay.textContent.trim() : "";
+      if (navigator.clipboard && url) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast("Mobile URL copied to clipboard!", "success");
+        });
+      }
+    });
+  }
+}
 
 // Theme Management
 function initTheme() {

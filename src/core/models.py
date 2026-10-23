@@ -82,5 +82,7 @@ class SystemInfoResponse(BaseModel):
     platform: str
     is_admin: bool
     sudo_message: str = ""
+    local_lan_ip: str = "127.0.0.1"
+    mobile_url: str = ""
     github_version: str | None = None
     github_broadcast: str | None = None

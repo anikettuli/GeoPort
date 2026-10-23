@@ -54,6 +54,7 @@ def open_browser_delayed(url: str, delay_seconds: float = 1.2) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=f"{APP_NAME} v{APP_VERSION} - Modern iOS Location Simulator")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host interface to bind to (default: 127.0.0.1)")
+    parser.add_argument("--wireless", action="store_true", help="Enable wireless host mode (binds to LAN so you can control GeoPort from your iPhone Safari)")
     parser.add_argument("--port", type=int, default=54321, help="Port to listen on (default: 54321)")
     parser.add_argument("--no-browser", action="store_true", help="Skip automatically opening the web browser")
     parser.add_argument("--wifihost", type=str, help="Specify manual Wi-Fi IP address of the iOS device")
@@ -85,21 +86,35 @@ def run_app() -> None:
                 logger.warning(f"Could not elevate permissions automatically: {e}")
 
     # Configure settings
-    settings.host = args.host
+    if args.wireless:
+        settings.host = "0.0.0.0"
+        settings.wireless_mode = True
+    else:
+        settings.host = args.host
+        settings.wireless_mode = args.host in ("0.0.0.0", "")
+
     settings.open_browser = not args.no_browser
     settings.wifihost = args.wifihost
     settings.target_udid = args.udid
     settings.debug = args.debug
 
     # Assign port
-    actual_port = find_available_port(args.port, settings.host)
+    actual_port = find_available_port(args.port, "0.0.0.0" if settings.wireless_mode else settings.host)
     settings.port = actual_port
 
-    server_url = f"http://{settings.host}:{actual_port}"
-    logger.info("=" * 60)
+    from src.core.config import LOCAL_LAN_IP
+    desktop_url = f"http://localhost:{actual_port}"
+    mobile_url = f"http://{LOCAL_LAN_IP}:{actual_port}"
+
+    logger.info("=" * 64)
     logger.info(f"  {APP_NAME} v{APP_VERSION} ({PLATFORM_LABEL})")
-    logger.info(f"  Server URL: {server_url}")
-    logger.info("=" * 60)
+    logger.info(f"  Desktop URL: {desktop_url}")
+    if settings.wireless_mode:
+        logger.info(f"  Wireless iPhone Safari URL: {mobile_url}")
+        logger.info("  -> Open this URL on your iPhone Safari to control GPS wirelessly!")
+    else:
+        logger.info("  Tip: Start with '--wireless' to control location directly from iPhone!")
+    logger.info("=" * 64)
 
     if settings.open_browser:
         open_browser_delayed(server_url)
