@@ -1,3 +1,4 @@
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request
@@ -15,7 +16,18 @@ from src.api.websocket_endpoint import router as ws_router
 from src.core.config import APP_NAME, APP_VERSION, PLATFORM_LABEL, logger
 from src.services.tunnel_service import tunnel_service
 
-BASE_DIR = Path(__file__).resolve().parent
+# Handle PyInstaller frozen executable path resolution
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    _meipass = Path(sys._MEIPASS)
+    if (_meipass / "src" / "templates").exists():
+        BASE_DIR = _meipass / "src"
+    elif (_meipass / "templates").exists():
+        BASE_DIR = _meipass
+    else:
+        BASE_DIR = Path(__file__).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
 

@@ -73,17 +73,11 @@ def run_app() -> None:
             import pyi_splash  # type: ignore
             pyi_splash.update_text("GeoPort Loaded...")
             pyi_splash.close()
-        except ImportError:
+        except Exception:
             pass
 
         if not pyuac.isUserAdmin():
-            logger.warning("Running without Administrator privileges.")
-            logger.info("Relaunching with Administrator permissions for Apple Mobile Device USB access...")
-            try:
-                pyuac.runAsAdmin()
-                sys.exit(0)
-            except Exception as e:
-                logger.warning(f"Could not elevate permissions automatically: {e}")
+            logger.info("Running as standard user (elevated admin not required for standard usbmux/Wi-Fi operations).")
 
     # Configure settings
     if args.wireless:
