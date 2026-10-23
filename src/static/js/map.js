@@ -37,19 +37,19 @@ function initMap(initialLat = 37.774929, initialLng = -122.419418) {
   // Zoom control in bottom right
   L.control.zoom({ position: "bottomright" }).addTo(map);
 
-  // Modern Tile Providers
+  // 100% Free, Keyless Open Tile Providers (No API keys or tokens required)
   tileLayers = {
-    cartoLight: L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-    }),
-    cartoDark: L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-    }),
     osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }),
+    osmHot: L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles by <a href="https://www.hotosm.org/">Humanitarian OpenStreetMap Team</a>',
+    }),
+    esriStreet: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri, DeLorme, NAVTEQ',
     }),
     topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
       maxZoom: 17,
@@ -57,20 +57,19 @@ function initMap(initialLat = 37.774929, initialLng = -122.419418) {
     }),
     satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
-      attribution: 'Tiles &copy; Esri',
+      attribution: 'Tiles &copy; Esri, Earthstar Geographics',
     }),
   };
 
-  // Set default tile layer according to current theme
-  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-  currentTileLayer = isDark ? tileLayers.cartoDark : tileLayers.cartoLight;
+  // Set default tile layer (OpenStreetMap Standard - 100% free, no key)
+  currentTileLayer = tileLayers.osm;
   currentTileLayer.addTo(map);
 
   // Layer Control Switcher
   const baseLayers = {
-    "CARTO Voyager (Light)": tileLayers.cartoLight,
-    "CARTO Dark Matter (Dark)": tileLayers.cartoDark,
-    "OpenStreetMap": tileLayers.osm,
+    "OpenStreetMap (Standard)": tileLayers.osm,
+    "OpenStreetMap (Humanitarian)": tileLayers.osmHot,
+    "Esri Street Map": tileLayers.esriStreet,
     "OpenTopoMap (Topographic)": tileLayers.topo,
     "Satellite Imagery": tileLayers.satellite,
   };
@@ -121,13 +120,7 @@ function updateCoordinateInputs(lat, lng) {
 }
 
 function switchMapTheme(theme) {
-  if (!map) return;
-  const newLayer = theme === "dark" ? tileLayers.cartoDark : tileLayers.cartoLight;
-  if (currentTileLayer !== newLayer) {
-    map.removeLayer(currentTileLayer);
-    currentTileLayer = newLayer;
-    currentTileLayer.addTo(map);
-  }
+  // Free tile providers remain fully functional across themes
 }
 
 function renderGPXRoute(waypoints) {
