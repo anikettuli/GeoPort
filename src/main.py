@@ -24,18 +24,37 @@ if IS_WINDOWS:
 
 
 def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
-    """Check if TCP port is currently in use."""
+    """Check if TCP port is currently in use by attempting a test bind."""
+    bind_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((host, port)) == 0
+        try:
+            s.bind((bind_host, port))
+            return False
+        except OSError:
+            return True
 
 
 def find_available_port(preferred_port: int, host: str = "127.0.0.1") -> int:
-    """Return preferred port if available, otherwise find a free dynamic port."""
-    if not is_port_in_use(preferred_port, host):
-        return preferred_port
+    """Return preferred port if available, otherwise find a nearby free port."""
+    bind_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((host, 0))
+        try:
+            s.bind((bind_host, preferred_port))
+            return preferred_port
+        except OSError:
+            pass
+
+    for p in range(preferred_port + 1, preferred_port + 50):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind((bind_host, p))
+                return p
+            except OSError:
+                continue
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((bind_host, 0))
         return s.getsockname()[1]
 
 
@@ -93,16 +112,16 @@ def run_app() -> None:
     settings.debug = args.debug
 
     # Assign port
-    actual_port = find_available_port(args.port, "0.0.0.0" if settings.wireless_mode else settings.host)
+    actual_port = find_available_port(args.port, settings.host)
     settings.port = actual_port
 
     from src.core.config import LOCAL_LAN_IP
-    desktop_url = f"http://localhost:{actual_port}"
+    server_url = f"http://localhost:{actual_port}"
     mobile_url = f"http://{LOCAL_LAN_IP}:{actual_port}"
 
     logger.info("=" * 64)
     logger.info(f"  {APP_NAME} v{APP_VERSION} ({PLATFORM_LABEL})")
-    logger.info(f"  Desktop URL: {desktop_url}")
+    logger.info(f"  Desktop URL: {server_url}")
     if settings.wireless_mode:
         logger.info(f"  Wireless iPhone Safari URL: {mobile_url}")
         logger.info("  -> Open this URL on your iPhone Safari to control GPS wirelessly!")
