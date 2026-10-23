@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_name }} - iOS Location Simulation</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- GeoPort Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- Fullscreen Leaflet Map -->
+  <div id="map"></div>
+
+  <!-- Floating UI Overlay -->
+  <div class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+      <!-- Brand & Version -->
+      <div class="brand-section">
+        <div class="brand-title">
+          <span>🌍</span>
+          <span>{{ app_name }}</span>
+        </div>
+        <span class="brand-badge">v{{ app_version }}</span>
+      </div>
+
+      <!-- Real-time Location Search with Autocomplete -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <span>🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search address, landmark, city, or coordinates..."
+            autocomplete="off"
+          />
+        </div>
+        <div id="searchDropdown" class="search-dropdown"></div>
+      </div>
+
+      <!-- Device Selector & Actions -->
+      <div class="top-actions">
+        <div class="device-selector-wrapper">
+          <span>📱</span>
+          <select id="deviceSelect" class="device-select">
+            <option value="">Scanning for devices...</option>
+          </select>
+          <button id="refreshDevicesBtn" class="icon-btn" title="Refresh Devices" style="width: 28px; height: 28px; border: none; box-shadow: none;">
+            🔄
+          </button>
+        </div>
+
+        <button id="themeToggleBtn" class="icon-btn" title="Toggle Light/Dark Theme">
+          🌙
+        </button>
+
+        <button id="exitAppBtn" class="icon-btn" title="Exit GeoPort" style="color: var(--accent-rose);">
+          ⏻
+        </button>
+      </div>
+    </header>
+
+    <!-- Side Control Panel -->
+    <aside id="controlPanel" class="panel-container">
+      <button id="panelToggleBtn" class="panel-toggle-btn" title="Toggle Panel">◀</button>
+
+      <!-- Panel Tabs -->
+      <nav class="panel-tabs">
+        <button class="panel-tab active" data-tab="tabLocation">📍 Location</button>
+        <button class="panel-tab" data-tab="tabGPX">🗺️ GPX</button>
+        <button class="panel-tab" data-tab="tabFuel">⛽ Fuel</button>
+        <button class="panel-tab" data-tab="tabDevice">⚙️ Tools</button>
+      </nav>
+
+      <!-- Developer Mode Warning Banner (shown if needed) -->
+      <div id="devModeWarningBanner" style="display: none; background: rgba(217, 119, 6, 0.15); border-bottom: 1px solid rgba(217, 119, 6, 0.3); padding: 10px 14px; font-size: 0.8rem; color: var(--accent-amber); align-items: center; justify-content: space-between;">
+        <span>⚠️ Developer Mode required</span>
+        <button id="enableDevModeBtn" class="btn btn-primary btn-sm" style="width: auto; padding: 4px 10px; font-size: 0.75rem;">Enable</button>
+      </div>
+
+      <!-- TAB 1: LOCATION -->
+      <div id="tabLocation" class="tab-content active">
+        <div id="simulationBanner" class="status-banner status-idle">
+          ⚪ Location simulation is currently inactive.
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Coordinates</label>
+          <div class="form-row">
+            <input type="text" id="inputLat" class="form-input" placeholder="Latitude" />
+            <input type="text" id="inputLng" class="form-input" placeholder="Longitude" />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 14px;">
+          <button id="btnSimulateLocation" class="btn btn-primary">
+            🚀 Simulate Location
+          </button>
+          <button id="btnStopLocation" class="btn btn-danger" style="width: 48%;">
+            ⏹ Stop Location
+          </button>
+        </div>
+
+        <div class="form-group" style="margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="margin-bottom: 0;">Nudge Location (WASD / Arrows)</label>
+          </div>
+
+          <!-- Compass / Joystick -->
+          <div class="joystick-container">
+            <div></div>
+            <button class="joystick-btn" data-direction="north" title="Nudge North (W or ↑)">▲</button>
+            <div></div>
+            <button class="joystick-btn" data-direction="west" title="Nudge West (A or ←)">◀</button>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--text-muted);">STEP</div>
+            <button class="joystick-btn" data-direction="east" title="Nudge East (D or →)">▶</button>
+            <div></div>
+            <button class="joystick-btn" data-direction="south" title="Nudge South (S or ↓)">▼</button>
+            <div></div>
+          </div>
+
+          <!-- Step Size Selector -->
+          <div class="step-size-selector">
+            <span class="step-pill" data-step="5">5m</span>
+            <span class="step-pill" data-step="10">10m</span>
+            <span class="step-pill active" data-step="20">20m</span>
+            <span class="step-pill" data-step="50">50m</span>
+            <span class="step-pill" data-step="100">100m</span>
+            <span class="step-pill" data-step="500">500m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: GPX ROUTE -->
+      <div id="tabGPX" class="tab-content">
+        <div class="form-group">
+          <label class="form-label">Load GPX Route File</label>
+          <input type="file" id="gpxFileInput" accept=".gpx,.xml" class="form-input" style="font-family: inherit; font-size: 0.82rem;" />
+          <div id="gpxFileInfo" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">No route loaded.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Simulation Speed</label>
+          <select id="gpxSpeedSelect" class="form-input">
+            <option value="1.4">🚶 Walking (~5 km/h)</option>
+            <option value="3.3">🏃 Running (~12 km/h)</option>
+            <option value="5.5">🚴 Cycling (~20 km/h)</option>
+            <option value="16.6">🚗 Driving (~60 km/h)</option>
+            <option value="30.0">🏎️ Fast (~108 km/h)</option>
+          </select>
+        </div>
+
+        <div id="gpxProgressInfo" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;"></div>
+
+        <div class="form-row">
+          <button id="btnPlayGPX" class="btn btn-primary">▶ Play GPX Route</button>
+          <button id="btnPauseGPX" class="btn btn-secondary" style="display: none;">⏸ Pause</button>
+          <button id="btnStopGPX" class="btn btn-danger" style="width: 44%;">⏹ Stop</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: FUEL MODE (AUSTRALIA) -->
+      <div id="tabFuel" class="tab-content">
+        <div class="form-group">
+          <label class="form-label">Select State / Region</label>
+          <select id="fuelRegionSelect" class="form-input">
+            <option value="All">All Australia</option>
+            <option value="NSW">New South Wales (NSW)</option>
+            <option value="VIC">Victoria (VIC)</option>
+            <option value="QLD">Queensland (QLD)</option>
+            <option value="WA">Western Australia (WA)</option>
+            <option value="SA">South Australia (SA)</option>
+            <option value="TAS">Tasmania (TAS)</option>
+          </select>
+        </div>
+
+        <div id="fuelListContainer" style="max-height: 380px; overflow-y: auto;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- TAB 4: DEVICE TOOLS -->
+      <div id="tabDevice" class="tab-content">
+        <div class="form-group">
+          <label class="form-label">Developer Image & Mode</label>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+            iOS requires Developer Mode enabled and Developer Disk Image mounted to allow location spoofing.
+          </p>
+          <button id="mountDiskBtn" class="btn btn-secondary" style="margin-bottom: 8px;">
+            💿 Mount Developer Disk Image
+          </button>
+        </div>
+
+        <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 14px;">
+          <label class="form-label">About GeoPort</label>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">
+            GeoPort v{{ app_version }} • Built with FastAPI, Leaflet, and Pymobiledevice3.<br/>
+            Safe, local, and modern iOS location simulation.
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- GeoPort Modular JavaScript Application -->
+  <script src="/static/js/map.js"></script>
+  <script src="/static/js/search.js"></script>
+  <script src="/static/js/devices.js"></script>
+  <script src="/static/js/simulation.js"></script>
+  <script src="/static/js/fuel.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

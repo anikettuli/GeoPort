@@ -1,112 +1,106 @@
-# GeoPort: Your Location, Anywhere! 🌍 
+# GeoPort 🌍
 
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<p align="center">
-  
-  <a href="https://www.buymeacoffee.com/davesc63">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=🍺&slug=davesc63&button_colour=FFDD00&font_colour=000000&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer">
-  </a><br> https://geoport.me
-</p>
+**GeoPort** is a modern, privacy-focused iOS location simulation and GPS spoofing platform. Built with **FastAPI**, **WebSockets**, **Leaflet**, and **[`pymobiledevice3`](https://github.com/doronz88/pymobiledevice3)**, it provides developers, QA testers, and security researchers with full control over virtual GPS positioning on iOS 16, 17, and 18 devices.
 
+---
 
-[![Join Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?logo=discord&style=for-the-badge)](https://discord.gg/genRca55Nb)<br>
-<a href="https://github.com/davesc63/GeoPort/releases/tag/v4.0.2">Release Notes and Downloads</a><br><p>
-<a href="https://github.com/davesc63/GeoPort/blob/main/FAQ.md">Need Help? - FAQ</a><br><p>
-<a href="https://www.surveymonkey.com/r/BLQ8M75">Your feedback helps - Fill out the Survey</a>
+## ✨ Features
 
-<p align="center"><strong>GeoPort needs your help.</p></strong> </p>
-Please consider <strong>donating</strong> and supporting the project. Your support helps to grow the platform and features.<br><p></p><br><p></p>
+- **iOS 16, 17 & 18 Support:** Automatic detection and tunneling via CoreDevice RSD (Remote Service Discovery) over USB and Wi-Fi.
+- **Location Search (Worldwide):** Instant address and landmark search powered by OpenStreetMap Nominatim and Photon, plus direct coordinate parsing (`lat, lng`).
+- **Modern Open Map Sources:** Seamless switching between CARTO Voyager (Light), CARTO Dark Matter (Dark), OpenStreetMap Standard, OpenTopoMap, and Satellite Imagery.
+- **Nudge & Joystick Controls:** Clickable compass controls and keyboard navigation (**WASD / Arrow Keys**) with configurable step distances (5m, 10m, 20m, 50m, 100m, 500m).
+- **GPX Route Replay:** Drag & drop GPX tracks with real-time waypoint streaming, speed presets (Walking, Running, Cycling, Driving), and play/pause/stop controls.
+- **Fuel Mode (Australia):** Real-time Australian fuel price tracking across states (NSW, VIC, QLD, WA, SA, TAS) with 1-click teleportation to stations.
+- **100% Local & Privacy-Preserving:** No secret telemetry or UDID exfiltration. Binds strictly to `127.0.0.1` with native TLS validation.
 
+---
 
-Immerse yourself in a world of possibilities with **GeoPort**, the ultimate location simulation app. GeoPort allows you to take control of your virtual presence, letting you be anywhere on the globe at the touch of a button. Whether you want to explore distant cities, surprise friends with exotic check-ins, or test location-based apps, GeoPort is your passport to a limitless world.
+## 🚀 Quick Start
 
+### Prerequisites
+- Python 3.10 or higher
+- **Windows Users:** iTunes or Apple Mobile Device Support installed (provides the usbmuxd service).
+- **macOS Users:** Xcode Command Line Tools (`xcode-select --install`).
 
+### Installation
 
-## Key Features
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/anikettuli/GeoPort.git
+   cd GeoPort
+   ```
 
-- **Global Presence**
-Spoof your location and appear as if you're in any city, country, or landmark globally.
+2. **Set up a virtual environment:**
+   Using [`uv`](https://github.com/astral-sh/uv) (recommended):
+   ```bash
+   uv venv --python 3.12 .venv
+   .venv\Scripts\activate      # On Windows
+   # source .venv/bin/activate  # On macOS/Linux
+   uv pip install -r requirements.txt
+   ```
+   Or using standard `pip`:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-- **Explore with Ease**
-Experience the thrill of virtual travel without leaving your comfort zone. Wander the streets of Tokyo, relax on a beach in Bali, or stroll through the historic alleys of Rome—all from the palm of your hand.
+3. **Run GeoPort:**
+   ```bash
+   python -m src.main
+   ```
+   Your default web browser will open automatically to `http://127.0.0.1:54321`.
 
-- **Test Apps Effectively**
-Developers, take note! GeoPort is your go-to tool for testing location-based features in your apps. Simulate diverse scenarios effortlessly.
+---
 
-- **Privacy and Security**
-Your privacy matters. GeoPort ensures a secure experience, allowing you to control when and where your virtual self appears.
+## 🛠️ Command-Line Options
 
-- **User-Friendly Interface**
-Seamlessly navigate GeoPort's intuitive interface. Set your desired location with a few taps and teleport within seconds.
+```text
+usage: main.py [-h] [--host HOST] [--port PORT] [--no-browser] [--wifihost WIFIHOST] [--udid UDID] [--debug]
 
-- **Unleash Your Imagination with GeoPort!**
-Download now and elevate your location experience beyond boundaries. Teleportation has never been this easy—**GeoPort**, where every location is just a click away!
+GeoPort v5.0.0 - Modern iOS Location Simulator
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport2.png" alt="geoport" width="50%"><br><br>
-   <img src="https://raw.githubusercontent.com/davesc63/GeoPort/main/images/geoport-demo.gif" alt="geoport">
-</p>
+options:
+  -h, --help           Show this help message and exit
+  --host HOST          Host interface to bind to (default: 127.0.0.1)
+  --port PORT          Port to listen on (default: 54321)
+  --no-browser         Skip automatically opening the web browser
+  --wifihost WIFIHOST  Specify manual Wi-Fi IP address of the iOS device
+  --udid UDID          Target specific device by UDID
+  --debug              Enable debug logging
+```
 
-## Fuel Mode:
+---
 
-For the :australia: Aussies :australia: who love to fire up their choppers and get their *Frugal Fuels* from the KwikiMart.
-the **"Fuel"** mode of GeoPort to easily select the best prices across Australia! There is even the ability to select **state-based** pricing
+## 🧪 Testing
 
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/fuel.png" alt="fuel" width="50%">
-</p>
+Run the test suite with `pytest`:
+```bash
+pytest
+```
 
-## Developer Mode
+---
 
-**Developer Mode:** Enable developer mode on connected iOS devices.
+## 🏛️ Architecture
 
-They've made it harder to enable Developer Mode, but GeoPort handles it with ease. If you don't have Developer Mode enabled on your iOS device - you will need to temporarily remove your passcode to allow GeoPort to enable Developer Mode (Don't worry, GeoPort will let you know when running the app)
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/devmode.png" alt="devmode" width="50%">
-</p>
+GeoPort v5.0 replaces legacy monolithic scripts with a clean asynchronous architecture:
+- **`src/core/`**: Configuration, data models (`Pydantic`), and system-wide settings.
+- **`src/services/`**:
+  - `device_service.py`: Usbmux & Bonjour discovery, lockdown clients, and AMFI Developer Mode.
+  - `tunnel_service.py`: Supervised CoreDevice TCP/QUIC tunnels for iOS 17+.
+  - `simulation_service.py`: Location setting/clearing and async GPX route streaming.
+  - `external_api_service.py`: Geocoding, fuel prices, and release notifications.
+  - `websocket_manager.py`: Real-time bi-directional events to the web UI.
+- **`src/api/`**: Typed REST & WebSocket routes.
+- **`src/static/` & `src/templates/`**: Modular, responsive CSS & JavaScript UI (no heavy external bundle requirements, offline-resilient).
 
-**Passcode Handling**
-<p align="center">
-<img src="https://github.com/davesc63/GeoPort/blob/main/images/passcode.png" alt="passcode" width="50%">
-</p>
+---
 
+## 📜 License
 
-
-## Prerequisites
-
-An iOS device and a sense of adventure!
-*That's Right* - you do not need to install complex apps like python for **GeoPort** to work
-
-**Windows Users**
-You will need to install iTunes (we need their USB service so we can discover the iOS device!)
-
-## Installation
-
-- [Download](https://github.com/davesc63/GeoPort/releases/) the package for your operating system
-- Run the application
-- Explore the world and **Simulate Location**
-
-## App Notes
-- iOS 17 & iOS 18 are supported on both Windows and Mac
-- Administrator / Sudo permissions are required for iOS17
-- If you forget to reset your location when you disconnect, Don't worry! Simply connect your device again and "Stop Location"
-
-## Tech Stuff and recognition
-GeoPort is built with python, flask and pymobiledevice3
-Interface inspired by the popular iFakeLocation, GeoPort is built for familiarity with the addition of iOS17 and Windows support (Windows release imminent)
-
-Pymobiledevice3 - https://github.com/doronz88/pymobiledevice3<br>
-iFakeLocation - https://github.com/master131/iFakeLocation
-
-## Keywords
-iOS 17, location spoofing, ios17 location simulation, ios17 windows support<br>
-iOS 18, location spoofing, ios18 location simulation, ios18 windows support
-
-
-## Pay it forward
-If this tools helps you, please consider buying me a beer so I can keep this app going!<br>
-<p align="center">
-  <a href="https://www.buymeacoffee.com/davesc63">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=🍺&slug=davesc63&button_colour=FFDD00&font_colour=000000&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a beer">
-  </a>
-</p>
+MIT License. See [LICENSE](LICENSE) for details.
